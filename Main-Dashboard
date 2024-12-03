@@ -1,0 +1,516 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Apr 13 16:20:02 2024
+
+@author: 91944
+"""
+
+import pickle
+import streamlit as st
+from streamlit_option_menu import option_menu
+
+# Define username and password
+USERNAME = 'admin'
+PASSWORD = 'password123'
+
+# Define a function for authentication
+def authenticate(username, password):
+    if username == USERNAME and password == PASSWORD:
+        return True
+    return False
+
+# Define a function to check if the user is logged in
+def is_logged_in():
+    if 'logged_in' in st.session_state:
+        return st.session_state.logged_in
+    else:
+        return False
+
+# Streamlit app - Login page
+def login_page():
+    
+    # Add background image CSS
+    page_element="""
+
+    <style>
+    [data-testid="stAppViewContainer"]{
+                background-image: url("https://scientificasia.org/wp-content/uploads/2021/04/Disease-Prediction.jpg");
+                background-size: cover;
+    }
+    </style>
+
+    """
+
+    st.markdown(page_element, unsafe_allow_html=True)
+    
+    st.title("Login")
+
+    # Input fields for username and password
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+
+    # Login button
+    if st.button("Login"):
+        if authenticate(username, password):
+            st.session_state.logged_in = True
+            st.success("Successfully logged in!")
+        else:
+            st.error("Invalid username or password. Please try again.")
+        
+
+# Streamlit app - Main page
+def main_page():
+    import streamlit as st
+
+    # Define each page's content as separate functions
+    def page1():
+        import streamlit as st
+        import pickle as pickle
+        import pandas as pd
+        import plotly.graph_objects as go
+        import numpy as np
+
+
+        def get_clean_data():
+            
+            page_element=f"""
+
+            <style>
+            [data-testid="stAppViewContainer"]{{
+              background-image: url("https://th.bing.com/th/id/R.e552b8f6611b7a890a9d3a8dd36fe2c6?rik=%2bjDjSUA5gXltmw&riu=http%3a%2f%2fgetwallpapers.com%2fwallpaper%2ffull%2f1%2fe%2fa%2f482737.jpg&ehk=ujudszKMGKt9t1uCrQBfEVRQ7cyG72KbkH6W9Lguoqg%3d&risl=&pid=ImgRaw&r=0")
+              
+            }}
+            [data-testid="stHeader"]{{
+              background-image: url("https://th.bing.com/th/id/R.e552b8f6611b7a890a9d3a8dd36fe2c6?rik=%2bjDjSUA5gXltmw&riu=http%3a%2f%2fgetwallpapers.com%2fwallpaper%2ffull%2f1%2fe%2fa%2f482737.jpg&ehk=ujudszKMGKt9t1uCrQBfEVRQ7cyG72KbkH6W9Lguoqg%3d&risl=&pid=ImgRaw&r=0")
+            }}
+            [data-testid="stToolbar"]{{
+              right: 2rem;
+              background-image: url("https://th.bing.com/th/id/R.e552b8f6611b7a890a9d3a8dd36fe2c6?rik=%2bjDjSUA5gXltmw&riu=http%3a%2f%2fgetwallpapers.com%2fwallpaper%2ffull%2f1%2fe%2fa%2f482737.jpg&ehk=ujudszKMGKt9t1uCrQBfEVRQ7cyG72KbkH6W9Lguoqg%3d&risl=&pid=ImgRaw&r=0")
+              background-size: cover;
+            }}
+            [data-testid="stSidebar"] > div:first-child {{
+              background-color: lightblue;
+              background-size: cover;
+            }}
+            }}
+            </style>
+
+            """
+
+            st.markdown(page_element, unsafe_allow_html=True)
+            
+            data = pd.read_csv("D:/multiple disease  prediction project/data.csv.csv")
+          
+            data = data.drop(['Unnamed: 32', 'id'], axis=1)
+          
+            data['diagnosis'] = data['diagnosis'].map({ 'M': 1, 'B': 0 })
+          
+            return data
+
+
+        def add_sidebar():
+          st.sidebar.header("Cell Nuclei Measurements")
+          
+          data = get_clean_data()
+          
+          slider_labels = [
+                ("Radius (mean)", "radius_mean"),
+                ("Texture (mean)", "texture_mean"),
+                ("Perimeter (mean)", "perimeter_mean"),
+                ("Area (mean)", "area_mean"),
+                ("Smoothness (mean)", "smoothness_mean"),
+                ("Compactness (mean)", "compactness_mean"),
+                ("Concavity (mean)", "concavity_mean"),
+                ("Concave points (mean)", "concave points_mean"),
+                ("Symmetry (mean)", "symmetry_mean"),
+                ("Fractal dimension (mean)", "fractal_dimension_mean"),
+                ("Radius (se)", "radius_se"),
+                ("Texture (se)", "texture_se"),
+                ("Perimeter (se)", "perimeter_se"),
+                ("Area (se)", "area_se"),
+                ("Smoothness (se)", "smoothness_se"),
+                ("Compactness (se)", "compactness_se"),
+                ("Concavity (se)", "concavity_se"),
+                ("Concave points (se)", "concave points_se"),
+                ("Symmetry (se)", "symmetry_se"),
+                ("Fractal dimension (se)", "fractal_dimension_se"),
+                ("Radius (worst)", "radius_worst"),
+                ("Texture (worst)", "texture_worst"),
+                ("Perimeter (worst)", "perimeter_worst"),
+                ("Area (worst)", "area_worst"),
+                ("Smoothness (worst)", "smoothness_worst"),
+                ("Compactness (worst)", "compactness_worst"),
+                ("Concavity (worst)", "concavity_worst"),
+                ("Concave points (worst)", "concave points_worst"),
+                ("Symmetry (worst)", "symmetry_worst"),
+                ("Fractal dimension (worst)", "fractal_dimension_worst"),
+            ]
+
+          input_dict = {}
+
+          for label, key in slider_labels:
+            input_dict[key] = st.sidebar.slider(
+              label,
+              min_value=float(0),
+              max_value=float(data[key].max()),
+              value=float(data[key].mean())
+            )
+            
+          return input_dict
+
+
+        def get_scaled_values(input_dict):
+          data = get_clean_data()
+          
+          X = data.drop(['diagnosis'], axis=1)
+          
+          scaled_dict = {}
+          
+          for key, value in input_dict.items():
+            max_val = X[key].max()
+            min_val = X[key].min()
+            scaled_value = (value - min_val) / (max_val - min_val)
+            scaled_dict[key] = scaled_value
+          
+          return scaled_dict
+          
+
+        def get_radar_chart(input_data):
+          
+          input_data = get_scaled_values(input_data)
+          
+          categories = ['Radius', 'Texture', 'Perimeter', 'Area', 
+                        'Smoothness', 'Compactness', 
+                        'Concavity', 'Concave Points',
+                        'Symmetry', 'Fractal Dimension']
+
+          fig = go.Figure()
+
+          fig.add_trace(go.Scatterpolar(
+                r=[
+                  input_data['radius_mean'], input_data['texture_mean'], input_data['perimeter_mean'],
+                  input_data['area_mean'], input_data['smoothness_mean'], input_data['compactness_mean'],
+                  input_data['concavity_mean'], input_data['concave points_mean'], input_data['symmetry_mean'],
+                  input_data['fractal_dimension_mean']
+                ],
+                theta=categories,
+                fill='toself',
+                name='Mean Value'
+          ))
+          fig.add_trace(go.Scatterpolar(
+                r=[
+                  input_data['radius_se'], input_data['texture_se'], input_data['perimeter_se'], input_data['area_se'],
+                  input_data['smoothness_se'], input_data['compactness_se'], input_data['concavity_se'],
+                  input_data['concave points_se'], input_data['symmetry_se'],input_data['fractal_dimension_se']
+                ],
+                theta=categories,
+                fill='toself',
+                name='Standard Error'
+          ))
+          fig.add_trace(go.Scatterpolar(
+                r=[
+                  input_data['radius_worst'], input_data['texture_worst'], input_data['perimeter_worst'],
+                  input_data['area_worst'], input_data['smoothness_worst'], input_data['compactness_worst'],
+                  input_data['concavity_worst'], input_data['concave points_worst'], input_data['symmetry_worst'],
+                  input_data['fractal_dimension_worst']
+                ],
+                theta=categories,
+                fill='toself',
+                name='Worst Value'
+          ))
+
+          fig.update_layout(
+            polar=dict(
+              radialaxis=dict(
+                visible=True,
+                range=[0, 1]
+              )),
+            showlegend=True
+          )
+          
+          return fig
+
+
+        def add_predictions(input_data):
+          model = pickle.load(open("D:/multiple disease  prediction project/model.pkl", "rb"))
+          scaler = pickle.load(open("D:/multiple disease  prediction project/scaler.pkl", "rb"))
+          
+          input_array = np.array(list(input_data.values())).reshape(1, -1)
+          
+          input_array_scaled = scaler.transform(input_array)
+          
+          prediction = model.predict(input_array_scaled)
+          
+          st.subheader("Cell cluster prediction")
+          st.write("The cell cluster is:")
+          
+          if prediction[0] == 0:
+            st.write("<span class='diagnosis benign'>Benign</span>", unsafe_allow_html=True)
+          else:
+            st.write("<span class='diagnosis malicious'>Malicious</span>", unsafe_allow_html=True)
+            
+          
+          st.write("Probability of being benign: ", model.predict_proba(input_array_scaled)[0][0])
+          st.write("Probability of being malicious: ", model.predict_proba(input_array_scaled)[0][1])
+          
+          st.write("This app can assist medical professionals in making a diagnosis, but should not be used as a substitute for a professional diagnosis.")
+
+
+
+        def main():
+          st.set_page_config(
+            page_title="Breast Cancer Predictor",
+            page_icon=":female-doctor:",
+            layout="wide",
+            initial_sidebar_state="expanded"
+          )
+          
+          with open("D:/multiple disease  prediction project/style.css") as f:
+            st.markdown("<style>{}</style>".format(f.read()), unsafe_allow_html=True)
+          
+          input_data = add_sidebar()
+          
+          with st.container():
+            st.title("Breast Cancer Predictor")
+            st.write("Please connect this app to your cytology lab to help diagnose breast cancer form your tissue sample. This app predicts using a machine learning model whether a breast mass is benign or malignant based on the measurements it receives from your cytosis lab. You can also update the measurements by hand using the sliders in the sidebar. ")
+          
+          col1, col2 = st.columns([4,1])
+          
+          with col1:
+            radar_chart = get_radar_chart(input_data)
+            st.plotly_chart(radar_chart)
+          with col2:
+            add_predictions(input_data)
+
+        if __name__ == '__main__':
+          main()
+        
+        
+    def page3():
+        import pickle
+        import streamlit as st
+        from streamlit_option_menu import option_menu
+
+
+        diabetes_model = pickle.load(open('D:/multiple disease  prediction project/.sav files/diabetes_model.sav', 'rb'))
+
+        import streamlit as st
+        import openai
+
+        page_element=f"""
+
+        <style>
+        [data-testid="stAppViewContainer"]{{
+          background-color: lightblue;
+          background-size: cover;        }}
+        [data-testid="stHeader"]{{
+          background-color: lightblue;
+        }}
+        [data-testid="stToolbar"]{{
+          right: 2rem;
+          background-color: lightblue;
+          background-size: cover;
+        }}
+        [data-testid="stSidebar"] > div:first-child {{
+          background-color: lightblue;
+          background-size: cover;
+        }}
+        }}
+        </style>
+
+        """
+
+        st.markdown(page_element, unsafe_allow_html=True)
+        # sidebar for navigate
+            
+        st.title("Diabetes Prediction Using ML")    
+        # getting the input data from the user
+        col1, col2, col3 = st.columns(3)
+            
+        with col1:
+                Pregnancies = st.text_input('Number of Pregnancies')
+                
+        with col2:
+                Glucose = st.text_input('Glucose Level')
+            
+        with col3:
+                BloodPressure = st.text_input('Blood Pressure value')
+            
+        with col1:
+                SkinThickness = st.text_input('Skin Thickness value')
+            
+        with col2:
+                Insulin = st.text_input('Insulin Level')
+            
+        with col3:
+                BMI = st.text_input('BMI value')
+            
+        with col1:
+                DiabetesPedigreeFunction = st.text_input('Diabetes Pedigree Function value')
+            
+        with col2:
+                Age = st.text_input('Age of the Person')
+            
+            
+            # code for Prediction
+        diab_diagnosis = ''
+            
+            # creating a button for Prediction
+            
+        if st.button('Diabetes Test Result'):
+                diab_prediction = diabetes_model.predict([[Pregnancies, Glucose, BloodPressure, SkinThickness, Insulin, BMI, DiabetesPedigreeFunction, Age]])
+                
+                if (diab_prediction[0] == 1):
+                  diab_diagnosis = 'The person is diabetic'
+                else:
+                  diab_diagnosis = 'The person is not diabetic'
+                
+        st.success(diab_diagnosis)
+        
+        import pickle
+        import streamlit as st
+        from streamlit_option_menu import option_menu
+        
+        parkinsons_model = pickle.load(open('D:/multiple disease  prediction project/.sav files/parkinsons_model.sav', 'rb'))
+        
+        import streamlit as st
+        import openai
+
+        
+        
+        # page title
+        st.title("Parkinson's Disease Prediction using ML")
+        
+        col1, col2, col3, col4, col5 = st.columns(5)  
+        
+        with col1:
+            fo = st.text_input('MDVP:Fo(Hz)')
+            
+        with col2:
+            fhi = st.text_input('MDVP:Fhi(Hz)')
+            
+        with col3:
+            flo = st.text_input('MDVP:Flo(Hz)')
+            
+        with col4:
+            Jitter_percent = st.text_input('MDVP:Jitter(%)')
+            
+        with col5:
+            Jitter_Abs = st.text_input('MDVP:Jitter(Abs)')
+            
+        with col1:
+            RAP = st.text_input('MDVP:RAP')
+            
+        with col2:
+            PPQ = st.text_input('MDVP:PPQ')
+            
+        with col3:
+            DDP = st.text_input('Jitter:DDP')
+            
+        with col4:
+            Shimmer = st.text_input('MDVP:Shimmer')
+            
+        with col5:
+            Shimmer_dB = st.text_input('MDVP:Shimmer(dB)')
+            
+        with col1:
+            APQ3 = st.text_input('Shimmer:APQ3')
+            
+        with col2:
+            APQ5 = st.text_input('Shimmer:APQ5')
+            
+        with col3:
+            APQ = st.text_input('MDVP:APQ')
+            
+        with col4:
+            DDA = st.text_input('Shimmer:DDA')
+            
+        with col5:
+            NHR = st.text_input('NHR')
+            
+        with col1:
+            HNR = st.text_input('HNR')
+            
+        with col2:
+            RPDE = st.text_input('RPDE')
+            
+        with col3:
+            DFA = st.text_input('DFA')
+            
+        with col4:
+            spread1 = st.text_input('spread1')
+            
+        with col5:
+            spread2 = st.text_input('spread2')
+            
+        with col1:
+            D2 = st.text_input('D2')
+            
+        with col2:
+            PPE = st.text_input('PPE')
+            
+        
+        
+        # code for Prediction
+        parkinsons_diagnosis = ''
+        
+        # creating a button for Prediction    
+        if st.button("Parkinson's Test Result"):
+            parkinsons_prediction = parkinsons_model.predict([[fo, fhi, flo, Jitter_percent, Jitter_Abs, RAP, PPQ,DDP,Shimmer,Shimmer_dB,APQ3,APQ5,APQ,DDA,NHR,HNR,RPDE,DFA,spread1,spread2,D2,PPE]])                          
+            
+            if (parkinsons_prediction[0] == 0):
+              parkinsons_diagnosis = "The person has Parkinson's disease"
+            else:
+              parkinsons_diagnosis = "The person does not have Parkinson's disease"
+            
+        st.success(parkinsons_diagnosis)
+    
+        
+        # Logout button
+        if st.button("Logout"):
+                st.session_state.logged_in = False
+                st.success("Successfully logged out!")
+
+    # Define a function to handle session state
+    def get_state():
+        if 'page' not in st.session_state:
+            st.session_state.page = 'page_1'
+            st.session_state.page ='page_2'
+
+    # Main function
+    def main():
+        get_state()
+
+        if st.session_state.page == 'page_1':
+            page1()
+        elif st.session_state.page == 'page_3':
+            page3()
+    def main():
+        # Initialize or reset the current page index state
+        if "currentPageIndex" not in st.session_state:
+            st.session_state.currentPageIndex = 0
+
+        pages = [page1, page3]
+        current_page_index = st.session_state.currentPageIndex
+        
+
+        # Display the current page based on the current page index
+        pages[current_page_index]()
+
+        # Add "Next" button
+        if current_page_index < len(pages) - 1:
+            if st.button("Next"):
+                st.session_state.currentPageIndex += 1
+
+    if __name__ == '__main__':
+      main()
+        
+# Streamlit app - Routing logic
+def main():
+    if not is_logged_in():
+        login_page()
+    else:
+        main_page()
+
+if __name__ == "__main__":
+    main()
